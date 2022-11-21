@@ -1,2 +1,2 @@
 # Cybercassonne
-This is a 3D-remaster of Klaus-Jurgen Wrede's "Carcassonne" game in cyberpunk style with some DLCs.
+This game is a 3D cyberpunk remaster of Carcassonne by Klaus-Jurgen Wrede. In addition to the original game, it is planned to implement some DLCs and original content.

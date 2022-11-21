@@ -1,5 +1,6 @@
 {
   "dependencies": {
+	"_comment1": "здесь мой комментарий",
     "com.unity.collab-proxy": {
       "version": "1.17.6",
       "depth": 0,

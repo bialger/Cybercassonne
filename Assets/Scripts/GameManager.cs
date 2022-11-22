@@ -15,4 +15,19 @@ public class GameManager : MonoBehaviour
     {
         
     }
+
+    GameObject AddPrefab(GameObject prefab, float x, float y, float z)
+    {
+        return Instantiate(prefab, new Vector3(x, y, z), Quaternion.identity);
+    }
+
+    void RotateObject(GameObject Obj, float angleX, float angleY, float angleZ)
+    {
+        Obj.transform.Rotate(angleX, angleY, angleZ);
+    }
+
+    void MoveObject(GameObject Obj, float velX, float velY, float velZ, float deltaTime)
+    {
+        Obj.transform.position += new Vector3(velX, velY, velZ) * deltaTime;
+    }
 }

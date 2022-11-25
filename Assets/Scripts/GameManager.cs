@@ -11,8 +11,9 @@ public class GameManager : MonoBehaviour
     private MotionManager _motionManager;
     private int counterTiles;
     private bool isChoosing;
-    private float height;
-    private float edge;
+    private float heightChoice;
+    private int countOtherMotions;
+    private int countOtherRotations;
 
     // Start is called before the first frame update
     void Start()
@@ -20,9 +21,10 @@ public class GameManager : MonoBehaviour
         _motionManager = MovingManager.GetComponent<MotionManager>();
         Tiles = new GameObject[72];
         counterTiles = 0;
-        height = 0.2f;
-        edge = 1.0f;
+        heightChoice = 0.2f;
         isChoosing = false;
+        countOtherMotions = 0;
+        countOtherRotations = 0;
     }
 
     // Update is called once per frame
@@ -30,21 +32,19 @@ public class GameManager : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-            if (!isChoosing && !_motionManager.IsMoving())
+            if (!isChoosing && !_motionManager.IsMoving(countOtherMotions + counterTiles - 1))
             {
                 AddTile(true);
             }
-            else if (!_motionManager.IsRotating() && !_motionManager.IsMoving())
+            else if (!_motionManager.IsRotating(countOtherRotations + counterTiles - 1) && !_motionManager.IsMoving(countOtherMotions + counterTiles - 1))
             {
-                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                RaycastHit hit;
-                bool make = Physics.Raycast(ray, out hit);
-                if (make)
+                RaycastHit hit = CameraHit();
+                if (hit.transform != null)
                 {
                     if (Tiles[counterTiles - 1].transform.CompareTag(hit.transform.tag))
                     {
                         isChoosing = false;
-                        _motionManager.StartMoving(0.0f, -height, 0.0f, 0.1f);
+                        _motionManager.StartMoving(countOtherMotions + counterTiles - 1, 0.0f, -heightChoice, 0.0f, 0.1f);
                     }
                     else
                     {
@@ -53,15 +53,20 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
+        if (Input.GetMouseButtonDown(1))
+        {
+            if (isChoosing)
+            {
+                _motionManager.StartRotating(countOtherRotations + counterTiles - 1, 0.0f, 90.0f, 0.0f, 0.5f);
+            }
+        }
     }
 
     //This method adds new tile
     private void AddTile(bool isNew)
     {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit;
-        bool make = Physics.Raycast(ray, out hit); // it is not clear why, but in direct way variables, changed inside "if", do not change
-        if (make)
+        RaycastHit hit = CameraHit();
+        if (hit.transform != null)
         {
             if (hit.transform.tag == "GameController") // Later here should be prefab-plate tag
             {
@@ -69,15 +74,15 @@ public class GameManager : MonoBehaviour
                 if (isNew)
                 {
                     counterTiles++;
+                    Tiles[counterTiles - 1] = AddPrefab(A, hit.point.x, heightChoice, hit.point.z); // TODO: from point to squares
+                    Tiles[counterTiles - 1].name += counterTiles;
+                    _motionManager.AssignRotationTarget(Tiles[counterTiles - 1]);
+                    _motionManager.AssignMotionTarget(Tiles[counterTiles - 1]);
                 }
                 else
                 {
-                    Destroy(Tiles[counterTiles - 1]);
+                    Tiles[counterTiles - 1].transform.position = new Vector3(hit.point.x, heightChoice, hit.point.z);
                 }
-                Tiles[counterTiles - 1] = AddPrefab(A, hit.point.x, height, hit.point.z); // TODO: from point to squares
-                Tiles[counterTiles - 1].name += counterTiles;
-                _motionManager.AssignRotationTarget(Tiles[counterTiles - 1]);
-                _motionManager.AssignMotionTarget(Tiles[counterTiles - 1]);
             }
         }
     }
@@ -86,6 +91,14 @@ public class GameManager : MonoBehaviour
     private GameObject AddPrefab(GameObject prefab, float x, float y, float z)
     {
         return Instantiate(prefab, new Vector3(x, y, z), Quaternion.identity);
+    }
+
+    private RaycastHit CameraHit()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+        Physics.Raycast(ray, out hit);
+        return hit;
     }
 
     // Some getters and setters

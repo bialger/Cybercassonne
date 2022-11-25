@@ -5,26 +5,39 @@ using UnityEngine;
 
 public class MotionManager : MonoBehaviour
 {
-    private GameManager _gameManager;
-    private GameObject RotateThis;
-    private bool isRotating;
-    private float startRotationTime;
-    private float rotationTime;
-    private Quaternion startAngle;
-    private Quaternion targetAngle;
-    private GameObject MoveThis;
-    private bool isMoving;
-    private float startMotionTime;
-    private float motionTime;
-    private Vector3 startPosition;
-    private Vector3 deltaPosition;
+    private List<GameObject> RotationTargets;
+    private List<bool> areRotating;
+    private List<float> startRotationTimes;
+    private List<float> rotationTimes;
+    private List<Quaternion> startAngles;
+    private List<Quaternion> targetAngles;
+    private int countRotations;
+    private List<GameObject> MotionTargets;
+    private List<bool> areMoving;
+    private List<float> startMotionTimes;
+    private List<float> motionTimes;
+    private List<Vector3> startPositions;
+    private List<Vector3> deltaPositions;
+    private int countMotions;
 
     // Start is called before the first frame update
     void Start()
     {
-        _gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
-        isRotating = false;
-        isMoving = false;
+        RotationTargets = new List<GameObject>();
+        areRotating = new List<bool>();
+        startRotationTimes = new List<float>();
+        rotationTimes = new List<float>();
+        startRotationTimes = new List<float>();
+        startAngles = new List<Quaternion>();
+        targetAngles = new List<Quaternion>();
+        MotionTargets = new List<GameObject>();
+        areMoving = new List<bool>();
+        startMotionTimes = new List<float>();
+        motionTimes = new List<float>();
+        startPositions = new List<Vector3>();
+        deltaPositions = new List<Vector3>();
+        countMotions = 0;
+        countRotations = 0;
     }
 
     // Update is called once per frame
@@ -32,74 +45,49 @@ public class MotionManager : MonoBehaviour
     {
         RotateIteration();
         MovingIteration();
-        if (Input.GetMouseButtonDown(1))
-        {
-            if (_gameManager.IsChoosing())
-            {
-                StartRotating(0.0f, 90.0f, 0.0f, 0.5f);
-            }
-        }
     }
 
     // This method begins rotation of an object for a given time (seconds)
-    public void StartRotating(float angleX, float angleY, float angleZ, float time)
+    public void StartRotating(int index, float angleX, float angleY, float angleZ, float time)
     {
-        if (!isRotating)
+        if (!areRotating[index])
         {
-            isRotating = true;
-            rotationTime = time;
-            try
-            {
-                startAngle = RotateThis.transform.rotation;
-            }
-            catch (NullReferenceException ex)
-            {
-                Debug.Log("Ignore this error in rotating: " + ex.ToString());
-            }
-            targetAngle = Quaternion.Euler(startAngle.eulerAngles.x + angleX, startAngle.eulerAngles.y + angleY, startAngle.eulerAngles.z + angleZ);
-            startRotationTime = Time.time;
+            areRotating[index] = true;
+            rotationTimes[index] = time;
+            startAngles[index] = RotationTargets[index].transform.rotation;
+            targetAngles[index] = Quaternion.Euler(startAngles[index].eulerAngles.x + angleX, startAngles[index].eulerAngles.y + angleY, startAngles[index].eulerAngles.z + angleZ);
+            startRotationTimes[index] = Time.time;
         }
     }
 
     // This method begins motion of a given an object for a given time (seconds)
-    public void StartMoving(float deltaX, float deltaY, float deltaZ, float time)
+    public void StartMoving(int index, float deltaX, float deltaY, float deltaZ, float time)
     {
-        if (!isMoving)
+        if (!areMoving[index])
         {
-            isMoving = true;
-            motionTime = time;
-            startPosition = MoveThis.transform.position;
-            deltaPosition = new Vector3(deltaX, deltaY, deltaZ);
-            startMotionTime = Time.time;
+            areMoving[index] = true;
+            motionTimes[index] = time;
+            startPositions[index] = MotionTargets[index].transform.position;
+            deltaPositions[index] = new Vector3(deltaX, deltaY, deltaZ);
+            startMotionTimes[index] = Time.time;
         }
     }
 
     // This method continues rotation
     private void RotateIteration()
     {
-        if (isRotating)
+        for (int i = 0; i < countRotations; i++)
         {
-            if (Time.time - startRotationTime < rotationTime)
+            if (areRotating[i])
             {
-                try // I dont really know why, but this works although NRE occurs.
+                if (Time.time - startRotationTimes[i] < rotationTimes[i])
                 {
-                    RotateThis.transform.rotation = Quaternion.Lerp(startAngle, targetAngle, (Time.time - startRotationTime) / rotationTime);
+                    RotationTargets[i].transform.rotation = Quaternion.Lerp(startAngles[i], targetAngles[i], (Time.time - startRotationTimes[i]) / rotationTimes[i]);
                 }
-                catch (NullReferenceException ex)
+                else
                 {
-                    Debug.Log("Ignore this error in rotating: " + ex.ToString());
-                }
-            }
-            else
-            {
-                isRotating = false;
-                try
-                {
-                    RotateThis.transform.rotation = targetAngle;
-                }
-                catch (NullReferenceException ex)
-                {
-                    Debug.Log("Ignore this error in rotating: " + ex.ToString());
+                    areRotating[i] = false;
+                    RotationTargets[i].transform.rotation = targetAngles[i];
                 }
             }
         }
@@ -108,16 +96,19 @@ public class MotionManager : MonoBehaviour
     // This method continues motion
     private void MovingIteration()
     {
-        if (isMoving)
+        for (int i = 0; i < countMotions; i++)
         {
-            if (Time.time - startMotionTime < motionTime)
+            if (areMoving[i])
             {
-                MoveThis.transform.position = startPosition + deltaPosition * (Time.time - startMotionTime) / motionTime;
-            }
-            else
-            {
-                isMoving = false;
-                MoveThis.transform.position = startPosition + deltaPosition;
+                if (Time.time - startMotionTimes[i] < motionTimes[i])
+                {
+                    MotionTargets[i].transform.position = startPositions[i] + deltaPositions[i] * (Time.time - startMotionTimes[i]) / motionTimes[i];
+                }
+                else
+                {
+                    areMoving[i] = false;
+                    MotionTargets[i].transform.position = startPositions[i] + deltaPositions[i];
+                }
             }
         }
     }
@@ -125,21 +116,41 @@ public class MotionManager : MonoBehaviour
     // Some setters and getters
     public void AssignRotationTarget(GameObject rotationTarget)
     {
-        this.RotateThis = rotationTarget;
+        this.RotationTargets.Add(rotationTarget);
+        areMoving.Add(false);
+        rotationTimes.Add(0.0f);
+        startAngles.Add(Quaternion.Euler(0, 0, 0));
+        targetAngles.Add(Quaternion.Euler(0, 0, 0));
+        startRotationTimes.Add(0.0f);
+        countRotations++;
     }
 
     public void AssignMotionTarget(GameObject motionTarget)
     {
-        this.MoveThis = motionTarget;
+        this.MotionTargets.Add(motionTarget);
+        areRotating.Add(false);
+        motionTimes.Add(0.0f);
+        startPositions.Add(new Vector3(0, 0, 0));
+        deltaPositions.Add(new Vector3(0, 0, 0));
+        startMotionTimes.Add(0.0f);
+        countMotions++;
     }
 
-    public bool IsRotating()
+    public bool IsRotating(int index)
     {
-        return isRotating;
+        if (index == -1)
+        {
+            return false;
+        }
+        else return areRotating[index];
     }
 
-    public bool IsMoving()
+    public bool IsMoving(int index)
     {
-        return isMoving;
+        if (index == -1)
+        {
+            return false;
+        }
+        else return areMoving[index];
     }
 }

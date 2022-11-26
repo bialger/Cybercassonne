@@ -12,8 +12,6 @@ public class GameManager : MonoBehaviour
     private int counterTiles;
     private bool isChoosing;
     private float heightChoice;
-    private int countOtherMotions;
-    private int countOtherRotations;
 
     // Start is called before the first frame update
     void Start()
@@ -23,20 +21,21 @@ public class GameManager : MonoBehaviour
         counterTiles = 0;
         heightChoice = 0.2f;
         isChoosing = false;
-        countOtherMotions = 0;
-        countOtherRotations = 0;
     }
 
     // Update is called once per frame
     void Update()
     {
+        Transform CurrentTileTransform;
+        if (counterTiles == 0) CurrentTileTransform = null;
+        else CurrentTileTransform = Tiles[counterTiles - 1].transform;
         if (Input.GetMouseButtonDown(0))
         {
-            if (!isChoosing && !_motionManager.IsMoving(countOtherMotions + counterTiles - 1))
+            if (!isChoosing && !_motionManager.IsMoving(CurrentTileTransform))
             {
                 AddTile(true);
             }
-            else if (!_motionManager.IsRotating(countOtherRotations + counterTiles - 1) && !_motionManager.IsMoving(countOtherMotions + counterTiles - 1))
+            else if (!_motionManager.IsRotating(CurrentTileTransform) && !_motionManager.IsMoving(CurrentTileTransform))
             {
                 RaycastHit hit = CameraHit();
                 if (hit.transform != null)
@@ -44,7 +43,7 @@ public class GameManager : MonoBehaviour
                     if (Tiles[counterTiles - 1].transform.CompareTag(hit.transform.tag))
                     {
                         isChoosing = false;
-                        _motionManager.StartMoving(countOtherMotions + counterTiles - 1, 0.0f, -heightChoice, 0.0f, 0.1f);
+                        _motionManager.StartMoving(CurrentTileTransform, 0.0f, -heightChoice, 0.0f, 0.1f);
                     }
                     else
                     {
@@ -57,7 +56,7 @@ public class GameManager : MonoBehaviour
         {
             if (isChoosing)
             {
-                _motionManager.StartRotating(countOtherRotations + counterTiles - 1, 0.0f, 90.0f, 0.0f, 0.5f);
+                _motionManager.StartRotating(CurrentTileTransform, 0.0f, 90.0f, 0.0f, 0.5f);
             }
         }
     }
@@ -76,8 +75,6 @@ public class GameManager : MonoBehaviour
                     counterTiles++;
                     Tiles[counterTiles - 1] = AddPrefab(A, hit.point.x, heightChoice, hit.point.z); // TODO: from point to squares
                     Tiles[counterTiles - 1].name += counterTiles;
-                    _motionManager.AssignRotationTarget(Tiles[counterTiles - 1]);
-                    _motionManager.AssignMotionTarget(Tiles[counterTiles - 1]);
                 }
                 else
                 {

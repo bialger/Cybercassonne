@@ -26,16 +26,15 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Transform CurrentTileTransform;
-        if (counterTiles == 0) CurrentTileTransform = null;
-        else CurrentTileTransform = Tiles[counterTiles - 1].transform;
+        Transform CurrentTileTransform = (counterTiles != 0) ? Tiles[counterTiles - 1].transform : null;
+        bool isNeitherMovingOrRotating = !_motionManager.IsMoving(CurrentTileTransform) && !_motionManager.IsRotating(CurrentTileTransform);
         if (Input.GetMouseButtonDown(0))
         {
-            if (!isChoosing && !_motionManager.IsMoving(CurrentTileTransform))
+            if (!isChoosing && isNeitherMovingOrRotating)
             {
                 AddTile(true);
             }
-            else if (!_motionManager.IsRotating(CurrentTileTransform) && !_motionManager.IsMoving(CurrentTileTransform))
+            else if (isNeitherMovingOrRotating)
             {
                 RaycastHit hit = CameraHit();
                 if (hit.transform != null)
@@ -54,7 +53,7 @@ public class GameManager : MonoBehaviour
         }
         if (Input.GetMouseButtonDown(1))
         {
-            if (isChoosing)
+            if (isChoosing && isNeitherMovingOrRotating)
             {
                 _motionManager.StartRotating(CurrentTileTransform, 0.0f, 90.0f, 0.0f, 0.5f);
             }

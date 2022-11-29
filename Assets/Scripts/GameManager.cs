@@ -74,6 +74,7 @@ public class GameManager : MonoBehaviour
                     counterTiles++;
                     Tiles[counterTiles - 1] = AddPrefab(A, hit.point.x, heightChoice, hit.point.z); // TODO: from point to squares
                     Tiles[counterTiles - 1].name += counterTiles;
+                    Tiles[counterTiles - 1].AddComponent<BoxCollider>().size = new Vector3(2, 1, 2);
                 }
                 else
                 {

@@ -44,23 +44,23 @@ public class MotionManager : MonoBehaviour
     }
 
     // This method begins rotation of an object for a given time (seconds)
-    public void StartRotating(Transform rotationTarget, float angleX, float angleY, float angleZ, float time)
+    public void StartRotating(Transform RotationTarget, float angleX, float angleY, float angleZ, float time)
     {
-        Vector3 startEulerAngle = rotationTarget.transform.rotation.eulerAngles;
-        RotationTargets.Add(rotationTarget);
+        Vector3 startEulerAngle = RotationTarget.transform.rotation.eulerAngles;
+        RotationTargets.Add(RotationTarget);
         rotationTimes.Add(time);
-        startAngles.Add(rotationTarget.transform.rotation);
+        startAngles.Add(RotationTarget.transform.rotation);
         deltaAngles.Add(Quaternion.Euler(startEulerAngle.x + angleX, startEulerAngle.y + angleY, startEulerAngle.z + angleZ));
         startRotationTimes.Add(Time.time);
         countRotations++;
     }
 
     // This method begins motion of a given an object for a given time (seconds)
-    public void StartMoving(Transform motionTarget, float deltaX, float deltaY, float deltaZ, float time)
+    public void StartMoving(Transform MotionTarget, float deltaX, float deltaY, float deltaZ, float time)
     {
-        MotionTargets.Add(motionTarget);
+        MotionTargets.Add(MotionTarget);
         motionTimes.Add(time);
-        startPositions.Add(motionTarget.transform.position);
+        startPositions.Add(MotionTarget.transform.position);
         deltaPositions.Add(new Vector3(deltaX, deltaY, deltaZ));
         startMotionTimes.Add(Time.time);
         countMotions++;
@@ -121,23 +121,23 @@ public class MotionManager : MonoBehaviour
     }
 
     // If there is a given element in the arrays of targets, element is rotating/moving.  
-    public bool IsRotating(Transform rotationTarget)
+    public bool IsRotating(Transform RotationTarget)
     {
         bool res = false;
-        if (rotationTarget != null)
+        if (RotationTarget != null)
         {
-            int index = RotationTargets.LastIndexOf(rotationTarget);
+            int index = RotationTargets.LastIndexOf(RotationTarget);
             if (index != -1) res = true;
         }
         return res;
     }
 
-    public bool IsMoving(Transform motionTarget)
+    public bool IsMoving(Transform MotionTarget)
     {
         bool res = false;
-        if (motionTarget != null)
+        if (MotionTarget != null)
         {
-            int index = MotionTargets.LastIndexOf(motionTarget);
+            int index = MotionTargets.LastIndexOf(MotionTarget);
             if (index != -1) res = true;
         }
         return res;

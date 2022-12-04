@@ -8,6 +8,7 @@ public class GameManager : MonoBehaviour
     private GameObject MotionManager;
     private GameObject PrefabManager;
     private GameObject[] Tiles;
+    public List<GameObject> ChoosingSquares;
     private string[] tileNames;
     private string[] tiles;
     private MotionManager _motionManager;
@@ -19,6 +20,7 @@ public class GameManager : MonoBehaviour
     private float edge;
     private int maxTiles;
     private int maxTypesOfTiles;
+    public GameObject ChoosingSquare;
 
     // Start is called before the first frame update
     void Start()
@@ -35,6 +37,7 @@ public class GameManager : MonoBehaviour
         _prefabManager = PrefabManager.GetComponent<PrefabManager>();
         RandomGenerator = new System.Random();
         Tiles = new GameObject[maxTiles];
+        ChoosingSquares = new List<GameObject>();
         tileNames = new string[] { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X" };
         tiles = new string[maxTiles];
 
@@ -42,6 +45,7 @@ public class GameManager : MonoBehaviour
         {
             tiles[i] = tileNames[RandomGenerator.Next(0, maxTypesOfTiles)];
         }
+        ChoosingSquares.Add(Instantiate(ChoosingSquare, new Vector3(0, 0, 0), Quaternion.identity));
     }
 
     // Update is called once per frame
@@ -64,6 +68,20 @@ public class GameManager : MonoBehaviour
                     {
                         isChoosing = false;
                         _motionManager.StartMoving(CurrentTileTransform, 0.0f, -heightChoice, 0.0f, 0.1f);
+                        foreach (GameObject i in ChoosingSquares)
+                        {
+                            Destroy(i);
+                        }
+                        ChoosingSquares = new List<GameObject>();
+                        for (int i = 0; i < counterTiles; i++)
+                        {
+                            int xOftheObject = (int)(Tiles[i].transform.position.x - Tiles[i].transform.position.x % 2);
+                            int zOftheObject = (int)(Tiles[i].transform.position.z - Tiles[i].transform.position.z % 2);
+                            ChoosingSquares.Add(Instantiate(ChoosingSquare, new Vector3(xOftheObject + 2, 0, zOftheObject), Quaternion.identity));
+                            ChoosingSquares.Add(Instantiate(ChoosingSquare, new Vector3(xOftheObject - 2, 0, zOftheObject), Quaternion.identity));
+                            ChoosingSquares.Add(Instantiate(ChoosingSquare, new Vector3(xOftheObject, 0, zOftheObject - 2), Quaternion.identity));
+                            ChoosingSquares.Add(Instantiate(ChoosingSquare, new Vector3(xOftheObject, 0, zOftheObject + 2), Quaternion.identity));
+                        }
                     }
                     else
                     {
@@ -87,19 +105,19 @@ public class GameManager : MonoBehaviour
         RaycastHit Hit = CameraHit();
         if (Hit.transform != null)
         {
-            if (Hit.transform.tag == "GameController") // Later here should be prefab-plate tag
+            if (ChoosingSquares[0].transform.CompareTag(Hit.transform.tag)) // Later here should be prefab-plate tag
             {
                 isChoosing = true;
                 if (isNew)
                 {
                     counterTiles++;
-                    Tiles[counterTiles - 1] = AddPrefabByName(tiles[counterTiles - 1], Hit.point.x, heightChoice, Hit.point.z); // TODO: from point to squares
+                    Tiles[counterTiles - 1] = AddPrefabByName(tiles[counterTiles - 1], Hit.transform.position.x - Hit.transform.position.x % 2, heightChoice, Hit.transform.position.z - Hit.transform.position.z % 2); // TODO: from point to squares
                     Tiles[counterTiles - 1].name += counterTiles;
                     Tiles[counterTiles - 1].AddComponent<BoxCollider>().size = new Vector3(edge, 1, edge);
                 }
                 else
                 {
-                    Tiles[counterTiles - 1].transform.position = new Vector3(Hit.point.x, heightChoice, Hit.point.z);
+                    Tiles[counterTiles - 1].transform.position = new Vector3(Hit.point.x - Hit.point.x % 2, heightChoice, Hit.point.z - Hit.point.z % 2);
                 }
             }
         }

@@ -29,6 +29,7 @@ public class PrefabManager : MonoBehaviour
     public GameObject V;
     public GameObject W;
     public GameObject X;
+    public GameObject ChoosingSquare;
     private Dictionary<string, GameObject> PrefabsFromNames;
 
     // Start is called before the first frame update
@@ -59,7 +60,8 @@ public class PrefabManager : MonoBehaviour
             ["U"] = U,
             ["V"] = V,
             ["W"] = W,
-            ["X"] = X
+            ["X"] = X,
+            ["ChoosingSquare"] = ChoosingSquare
         };
     }
 

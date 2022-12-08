@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028334, g: 0.2257134, b: 0.30692226, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -249,8 +249,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d1ff1e921506aa4cb91f12be46f5354, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ChoosingSquares: []
-  ChoosingSquare: {fileID: 7800252883819703726, guid: fa2cf71a94ba78f43913ddf8d5b5d9cc, type: 3}
 --- !u!4 &602303546
 Transform:
   m_ObjectHideFlags: 0
@@ -363,6 +361,7 @@ MonoBehaviour:
   V: {fileID: 7165475776888523358, guid: 6e64d8d2a0f532e40b152ee9ed6ff6ba, type: 3}
   W: {fileID: 7165475776888523358, guid: 524add1a48668cb4ca127097a6cf1a8d, type: 3}
   X: {fileID: 7165475776888523358, guid: 9f588a56c1462e04482e43d12e066856, type: 3}
+  ChoosingSquare: {fileID: 7800252883819703726, guid: fa2cf71a94ba78f43913ddf8d5b5d9cc, type: 3}
 --- !u!4 &838428893
 Transform:
   m_ObjectHideFlags: 0
@@ -549,7 +548,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1884537677}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 4, z: -20}
+  m_LocalPosition: {x: 0, y: 3, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

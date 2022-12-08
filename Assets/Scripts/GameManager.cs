@@ -45,6 +45,7 @@ public class GameManager : MonoBehaviour
         {
             tiles[i] = tileNames[RandomGenerator.Next(0, maxTypesOfTiles)];
         }
+
         ChoosingSquares.Add(Instantiate(ChoosingSquare, new Vector3(0, 0, 0), Quaternion.identity));
     }
 
@@ -68,15 +69,18 @@ public class GameManager : MonoBehaviour
                     {
                         isChoosing = false;
                         _motionManager.StartMoving(CurrentTileTransform, 0.0f, -heightChoice, 0.0f, 0.1f);
+
                         foreach (GameObject i in ChoosingSquares)
                         {
                             Destroy(i);
                         }
+
                         ChoosingSquares = new List<GameObject>();
+
                         for (int i = 0; i < counterTiles; i++)
                         {
-                            int xOftheObject = (int)(Tiles[i].transform.position.x - Tiles[i].transform.position.x % 2);
-                            int zOftheObject = (int)(Tiles[i].transform.position.z - Tiles[i].transform.position.z % 2);
+                            int xOftheObject = (int)(Tiles[i].transform.position.x);
+                            int zOftheObject = (int)(Tiles[i].transform.position.z);
                             ChoosingSquares.Add(Instantiate(ChoosingSquare, new Vector3(xOftheObject + 2, 0, zOftheObject), Quaternion.identity));
                             ChoosingSquares.Add(Instantiate(ChoosingSquare, new Vector3(xOftheObject - 2, 0, zOftheObject), Quaternion.identity));
                             ChoosingSquares.Add(Instantiate(ChoosingSquare, new Vector3(xOftheObject, 0, zOftheObject - 2), Quaternion.identity));
@@ -105,19 +109,23 @@ public class GameManager : MonoBehaviour
         RaycastHit Hit = CameraHit();
         if (Hit.transform != null)
         {
-            if (ChoosingSquares[0].transform.CompareTag(Hit.transform.tag)) // Later here should be prefab-plate tag
+            if (ChoosingSquares[0].transform.CompareTag(Hit.transform.tag) && counterTiles <= maxTiles)
             {
                 isChoosing = true;
                 if (isNew)
                 {
                     counterTiles++;
-                    Tiles[counterTiles - 1] = AddPrefabByName(tiles[counterTiles - 1], Hit.transform.position.x - Hit.transform.position.x % 2, heightChoice, Hit.transform.position.z - Hit.transform.position.z % 2); // TODO: from point to squares
-                    Tiles[counterTiles - 1].name += counterTiles;
+                    Tiles[counterTiles - 1] = AddPrefabByName(tiles[counterTiles - 1], Hit.transform.position.x, heightChoice, Hit.transform.position.z);
                     Tiles[counterTiles - 1].AddComponent<BoxCollider>().size = new Vector3(edge, 1, edge);
+                    Tiles[counterTiles - 1].transform.tag = "CurrentTile";
+                    if (counterTiles > 1)
+                    {
+                        Tiles[counterTiles - 2].transform.tag = "OldTile";
+                    }
                 }
                 else
                 {
-                    Tiles[counterTiles - 1].transform.position = new Vector3(Hit.point.x - Hit.point.x % 2, heightChoice, Hit.point.z - Hit.point.z % 2);
+                    Tiles[counterTiles - 1].transform.position = new Vector3(Hit.transform.position.x, heightChoice, Hit.transform.position.z);
                 }
             }
         }

@@ -7,12 +7,14 @@ public class GameManager : MonoBehaviour
 {
     private GameObject MotionManager;
     private GameObject PrefabManager;
+    private GameObject TileManager;
     private GameObject[] Tiles;
     private List<GameObject> ChoosingSquares;
     private string[] tileNames;
     private string[] tiles;
     private MotionManager _motionManager;
     private PrefabManager _prefabManager;
+    private TileManager _tileManager;
     private System.Random RandomGenerator;
     private int counterTiles;
     private bool isChoosing;
@@ -32,8 +34,10 @@ public class GameManager : MonoBehaviour
         maxTypesOfTiles = 24;
         MotionManager = GameObject.Find("MotionManager");
         PrefabManager = GameObject.Find("PrefabManager");
+        TileManager = GameObject.Find("TileManager");
         _motionManager = MotionManager.GetComponent<MotionManager>();
         _prefabManager = PrefabManager.GetComponent<PrefabManager>();
+        _tileManager = TileManager.GetComponent<TileManager>();
         RandomGenerator = new System.Random();
         Tiles = new GameObject[maxTiles];
         ChoosingSquares = new List<GameObject>();
@@ -49,7 +53,7 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (ChoosingSquares.Count == 0)
+        if (ChoosingSquares.Count == 0 && counterTiles == 0)
         {
             ChoosingSquares.Add(AddPrefabByName("ChoosingSquare", 0, 0, 0));
         }
@@ -77,15 +81,47 @@ public class GameManager : MonoBehaviour
                         }
 
                         ChoosingSquares = new List<GameObject>();
-
-                        for (int i = 0; i < counterTiles; i++)
+                        if (counterTiles < maxTiles)
                         {
-                            float xOfTheObject = Tiles[i].transform.position.x;
-                            float zOfTheObject = Tiles[i].transform.position.z;
-                            ChoosingSquares.Add(AddPrefabByName("ChoosingSquare", xOfTheObject + 2, 0, zOfTheObject));
-                            ChoosingSquares.Add(AddPrefabByName("ChoosingSquare", xOfTheObject - 2, 0, zOfTheObject));
-                            ChoosingSquares.Add(AddPrefabByName("ChoosingSquare", xOfTheObject, 0, zOfTheObject - 2));
-                            ChoosingSquares.Add(AddPrefabByName("ChoosingSquare", xOfTheObject, 0, zOfTheObject + 2));
+                            Dictionary<int[], bool> putAllSqaures = new Dictionary<int[], bool>();
+                            List<int[]> squareCoordinates = new List<int[]>();
+
+                            for (int i = 0; i < counterTiles; i++)
+                            {
+                                int xOfTheTile = (int)Tiles[i].transform.position.x;
+                                int zOfTheTile = (int)Tiles[i].transform.position.z;
+                                squareCoordinates.Add(new int[] { xOfTheTile, zOfTheTile + 2 });
+                                squareCoordinates.Add(new int[] { xOfTheTile + 2, zOfTheTile });
+                                squareCoordinates.Add(new int[] { xOfTheTile, zOfTheTile - 2 });
+                                squareCoordinates.Add(new int[] { xOfTheTile - 2, zOfTheTile });
+
+                                for (int j = 0; j < 4; j++)
+                                {
+                                    if (!putAllSqaures.ContainsKey(squareCoordinates[4 * i + j]))
+                                        putAllSqaures.Add(squareCoordinates[4 * i + j], true);
+                                }
+                            }
+
+                            for (int i = 0; i < counterTiles; i++)
+                            {
+                                float xOfTheTile = Tiles[i].transform.position.x;
+                                float zOfTheObject = Tiles[i].transform.position.z;
+                                bool[] putSquares = _tileManager.areCompatible(tiles[counterTiles], tiles[i], (int)(Tiles[i].transform.rotation.eulerAngles.y / 90));
+
+                                for (int j = 0; j < 4; j++)
+                                {
+                                    if (putAllSqaures[squareCoordinates[4 * i + j]] && !putSquares[j])
+                                        putAllSqaures[squareCoordinates[4 * i + j]] = false;
+                                }
+                            }
+
+                            foreach (var dataPair in putAllSqaures)
+                            {
+                                if (dataPair.Value)
+                                {
+                                    ChoosingSquares.Add(AddPrefabByName("ChoosingSquare", dataPair.Key[0], 0, dataPair.Key[1]));
+                                }
+                            }
                         }
                     }
                     else

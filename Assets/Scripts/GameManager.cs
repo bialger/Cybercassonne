@@ -5,27 +5,58 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public GameObject A;
-    public GameObject MovingManager;
+    private GameObject MotionManager;
+    private GameObject PrefabManager;
+    private GameObject TileManager;
     private GameObject[] Tiles;
+    private List<GameObject> ChoosingSquares;
+    private string[] tileNames;
+    private string[] tiles;
     private MotionManager _motionManager;
+    private PrefabManager _prefabManager;
+    private TileManager _tileManager;
+    private System.Random RandomGenerator;
     private int counterTiles;
     private bool isChoosing;
     private float heightChoice;
+    private float edge;
+    private int maxTiles;
+    private int maxTypesOfTiles;
 
     // Start is called before the first frame update
     void Start()
     {
-        _motionManager = MovingManager.GetComponent<MotionManager>();
-        Tiles = new GameObject[72];
         counterTiles = 0;
         heightChoice = 0.2f;
         isChoosing = false;
+        edge = 2.0f;
+        maxTiles = 72;
+        maxTypesOfTiles = 24;
+        MotionManager = GameObject.Find("MotionManager");
+        PrefabManager = GameObject.Find("PrefabManager");
+        TileManager = GameObject.Find("TileManager");
+        _motionManager = MotionManager.GetComponent<MotionManager>();
+        _prefabManager = PrefabManager.GetComponent<PrefabManager>();
+        _tileManager = TileManager.GetComponent<TileManager>();
+        RandomGenerator = new System.Random();
+        Tiles = new GameObject[maxTiles];
+        ChoosingSquares = new List<GameObject>();
+        tileNames = new string[] { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X" };
+        tiles = new string[maxTiles];
+
+        for (int i = 0; i < maxTiles; i++)
+        {
+            tiles[i] = tileNames[RandomGenerator.Next(0, maxTypesOfTiles)];
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (ChoosingSquares.Count == 0 && counterTiles == 0)
+        {
+            ChoosingSquares.Add(AddPrefabByName("ChoosingSquare", 0, 0, 0));
+        }
         Transform CurrentTileTransform = (counterTiles != 0) ? Tiles[counterTiles - 1].transform : null;
         bool isNeitherMovingOrRotating = !_motionManager.IsMoving(CurrentTileTransform) && !_motionManager.IsRotating(CurrentTileTransform);
         if (Input.GetMouseButtonDown(0))
@@ -36,13 +67,78 @@ public class GameManager : MonoBehaviour
             }
             else if (isNeitherMovingOrRotating)
             {
-                RaycastHit hit = CameraHit();
-                if (hit.transform != null)
+                RaycastHit Hit = CameraHit();
+                if (Hit.transform != null)
                 {
-                    if (Tiles[counterTiles - 1].transform.CompareTag(hit.transform.tag))
+                    if (Tiles[counterTiles - 1].transform.CompareTag(Hit.transform.tag))
                     {
                         isChoosing = false;
                         _motionManager.StartMoving(CurrentTileTransform, 0.0f, -heightChoice, 0.0f, 0.1f);
+
+                        foreach (GameObject oldSquare in ChoosingSquares)
+                        {
+                            Destroy(oldSquare);
+                        }
+
+                        ChoosingSquares = new List<GameObject>();
+                        if (counterTiles < maxTiles)
+                        {
+                            int fieldSide = (maxTiles + 1) * 4;
+                            int[,] putAllSquares = new int[fieldSide, fieldSide];
+
+                            for (int i = 0; i < fieldSide; i++)
+                            {
+                                for (int j = 0; j < fieldSide; j++)
+                                {
+                                    putAllSquares[i, j] = 2;
+                                }
+                            }
+
+                            for (int i = 0; i < counterTiles; i++)
+                            {
+                                int xOfTheTile = (int)Tiles[i].transform.position.x + fieldSide / 2;
+                                int zOfTheTile = (int)Tiles[i].transform.position.z + fieldSide / 2;
+                                bool[] putSquares = _tileManager.areCompatible(tiles[counterTiles], tiles[i], (int)(Tiles[i].transform.rotation.eulerAngles.y / 90));
+                                putAllSquares[xOfTheTile, zOfTheTile] = 0;
+                                if (putAllSquares[xOfTheTile, zOfTheTile + 2] == 2 || putAllSquares[xOfTheTile, zOfTheTile + 2] == 1)
+                                {
+                                    if (putSquares[0])
+                                        putAllSquares[xOfTheTile, zOfTheTile + 2] = 1;
+                                    else
+                                        putAllSquares[xOfTheTile, zOfTheTile + 2] = 0;
+                                }
+                                if (putAllSquares[xOfTheTile + 2, zOfTheTile] == 2 || putAllSquares[xOfTheTile + 2, zOfTheTile] == 1)
+                                {
+                                    if (putSquares[1])
+                                        putAllSquares[xOfTheTile + 2, zOfTheTile] = 1;
+                                    else
+                                        putAllSquares[xOfTheTile + 2, zOfTheTile] = 0;
+                                }
+                                if (putAllSquares[xOfTheTile, zOfTheTile - 2] == 2 || putAllSquares[xOfTheTile, zOfTheTile - 2] == 1)
+                                {
+                                    if (putSquares[2])
+                                        putAllSquares[xOfTheTile, zOfTheTile - 2] = 1;
+                                    else
+                                        putAllSquares[xOfTheTile, zOfTheTile - 2] = 0;
+                                }
+                                if (putAllSquares[xOfTheTile - 2, zOfTheTile] == 2 || putAllSquares[xOfTheTile - 2, zOfTheTile] == 1)
+                                {
+                                    if (putSquares[3])
+                                        putAllSquares[xOfTheTile - 2, zOfTheTile] = 1;
+                                    else
+                                        putAllSquares[xOfTheTile - 2, zOfTheTile] = 0;
+                                }
+                            }
+
+                            for (int i = 0; i < fieldSide; i++)
+                            {
+                                for (int j = 0; j < fieldSide; j++)
+                                {
+                                    if (putAllSquares[i, j] == 1)
+                                        ChoosingSquares.Add(AddPrefabByName("ChoosingSquare", i - fieldSide / 2, 0, j - fieldSide / 2));
+                                }
+                            }
+                        }
                     }
                     else
                     {
@@ -63,48 +159,44 @@ public class GameManager : MonoBehaviour
     //This method adds new tile
     private void AddTile(bool isNew)
     {
-        RaycastHit hit = CameraHit();
-        if (hit.transform != null)
+        RaycastHit Hit = CameraHit();
+        if (Hit.transform != null)
         {
-            if (hit.transform.tag == "GameController") // Later here should be prefab-plate tag
+            if (ChoosingSquares[0].transform.CompareTag(Hit.transform.tag) && counterTiles <= maxTiles)
             {
                 isChoosing = true;
                 if (isNew)
                 {
                     counterTiles++;
-                    Tiles[counterTiles - 1] = AddPrefab(A, hit.point.x, heightChoice, hit.point.z); // TODO: from point to squares
+                    Tiles[counterTiles - 1] = AddPrefabByName(tiles[counterTiles - 1], Hit.transform.position.x, heightChoice, Hit.transform.position.z);
+                    Tiles[counterTiles - 1].AddComponent<BoxCollider>().size = new Vector3(edge, 0.5f, edge); // TODO: replace y shape with smth relevant
                     Tiles[counterTiles - 1].name += counterTiles;
+                    Tiles[counterTiles - 1].transform.tag = "CurrentTile";
+                    if (counterTiles > 1)
+                    {
+                        Tiles[counterTiles - 2].transform.tag = "OldTile";
+                    }
                 }
                 else
                 {
-                    Tiles[counterTiles - 1].transform.position = new Vector3(hit.point.x, heightChoice, hit.point.z);
+                    Tiles[counterTiles - 1].transform.position = new Vector3(Hit.transform.position.x, heightChoice, Hit.transform.position.z);
                 }
             }
         }
     }
 
     // This method adds a given prefab and returns an GameObject
-    private GameObject AddPrefab(GameObject prefab, float x, float y, float z)
+    public GameObject AddPrefabByName(string prefabName, float x, float y, float z)
     {
-        return Instantiate(prefab, new Vector3(x, y, z), Quaternion.identity);
+        return Instantiate(_prefabManager.GetPrefabByName(prefabName), new Vector3(x, y, z), Quaternion.identity);
     }
 
+    // This method return Hit where now cursor is
     private RaycastHit CameraHit()
     {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit;
-        Physics.Raycast(ray, out hit);
-        return hit;
-    }
-
-    // Some getters and setters
-    public bool IsChoosing()
-    {
-        return isChoosing;
-    }
-
-    public void SetChoosing(bool choosing)
-    {
-        this.isChoosing = choosing;
+        Ray Ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit Hit;
+        Physics.Raycast(Ray, out Hit);
+        return Hit;
     }
 }

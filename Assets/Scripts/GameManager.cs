@@ -75,51 +75,67 @@ public class GameManager : MonoBehaviour
                         isChoosing = false;
                         _motionManager.StartMoving(CurrentTileTransform, 0.0f, -heightChoice, 0.0f, 0.1f);
 
-                        foreach (GameObject i in ChoosingSquares)
+                        foreach (GameObject oldSquare in ChoosingSquares)
                         {
-                            Destroy(i);
+                            Destroy(oldSquare);
                         }
 
                         ChoosingSquares = new List<GameObject>();
                         if (counterTiles < maxTiles)
                         {
-                            Dictionary<int[], bool> putAllSqaures = new Dictionary<int[], bool>();
-                            List<int[]> squareCoordinates = new List<int[]>();
+                            int fieldSide = (maxTiles + 1) * 4;
+                            int[,] putAllSquares = new int[fieldSide, fieldSide];
 
-                            for (int i = 0; i < counterTiles; i++)
+                            for (int i = 0; i < fieldSide; i++)
                             {
-                                int xOfTheTile = (int)Tiles[i].transform.position.x;
-                                int zOfTheTile = (int)Tiles[i].transform.position.z;
-                                squareCoordinates.Add(new int[] { xOfTheTile, zOfTheTile + 2 });
-                                squareCoordinates.Add(new int[] { xOfTheTile + 2, zOfTheTile });
-                                squareCoordinates.Add(new int[] { xOfTheTile, zOfTheTile - 2 });
-                                squareCoordinates.Add(new int[] { xOfTheTile - 2, zOfTheTile });
-
-                                for (int j = 0; j < 4; j++)
+                                for (int j = 0; j < fieldSide; j++)
                                 {
-                                    if (!putAllSqaures.ContainsKey(squareCoordinates[4 * i + j]))
-                                        putAllSqaures.Add(squareCoordinates[4 * i + j], true);
+                                    putAllSquares[i, j] = 2;
                                 }
                             }
 
                             for (int i = 0; i < counterTiles; i++)
                             {
-                                float xOfTheTile = Tiles[i].transform.position.x;
-                                float zOfTheObject = Tiles[i].transform.position.z;
+                                int xOfTheTile = (int)Tiles[i].transform.position.x + fieldSide / 2;
+                                int zOfTheTile = (int)Tiles[i].transform.position.z + fieldSide / 2;
                                 bool[] putSquares = _tileManager.areCompatible(tiles[counterTiles], tiles[i], (int)(Tiles[i].transform.rotation.eulerAngles.y / 90));
-
-                                for (int j = 0; j < 4; j++)
+                                putAllSquares[xOfTheTile, zOfTheTile] = 0;
+                                if (putAllSquares[xOfTheTile, zOfTheTile + 2] == 2 || putAllSquares[xOfTheTile, zOfTheTile + 2] == 1)
                                 {
-                                    if (putAllSqaures[squareCoordinates[4 * i + j]] && !putSquares[j])
-                                        putAllSqaures[squareCoordinates[4 * i + j]] = false;
+                                    if (putSquares[0])
+                                        putAllSquares[xOfTheTile, zOfTheTile + 2] = 1;
+                                    else
+                                        putAllSquares[xOfTheTile, zOfTheTile + 2] = 0;
+                                }
+                                if (putAllSquares[xOfTheTile + 2, zOfTheTile] == 2 || putAllSquares[xOfTheTile + 2, zOfTheTile] == 1)
+                                {
+                                    if (putSquares[1])
+                                        putAllSquares[xOfTheTile + 2, zOfTheTile] = 1;
+                                    else
+                                        putAllSquares[xOfTheTile + 2, zOfTheTile] = 0;
+                                }
+                                if (putAllSquares[xOfTheTile, zOfTheTile - 2] == 2 || putAllSquares[xOfTheTile, zOfTheTile - 2] == 1)
+                                {
+                                    if (putSquares[2])
+                                        putAllSquares[xOfTheTile, zOfTheTile - 2] = 1;
+                                    else
+                                        putAllSquares[xOfTheTile, zOfTheTile - 2] = 0;
+                                }
+                                if (putAllSquares[xOfTheTile - 2, zOfTheTile] == 2 || putAllSquares[xOfTheTile - 2, zOfTheTile] == 1)
+                                {
+                                    if (putSquares[3])
+                                        putAllSquares[xOfTheTile - 2, zOfTheTile] = 1;
+                                    else
+                                        putAllSquares[xOfTheTile - 2, zOfTheTile] = 0;
                                 }
                             }
 
-                            foreach (var dataPair in putAllSqaures)
+                            for (int i = 0; i < fieldSide; i++)
                             {
-                                if (dataPair.Value)
+                                for (int j = 0; j < fieldSide; j++)
                                 {
-                                    ChoosingSquares.Add(AddPrefabByName("ChoosingSquare", dataPair.Key[0], 0, dataPair.Key[1]));
+                                    if (putAllSquares[i, j] == 1)
+                                        ChoosingSquares.Add(AddPrefabByName("ChoosingSquare", i - fieldSide / 2, 0, j - fieldSide / 2));
                                 }
                             }
                         }

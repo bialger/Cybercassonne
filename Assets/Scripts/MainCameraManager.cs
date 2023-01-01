@@ -48,8 +48,8 @@ public class MainCameraManager : MonoBehaviour
         KeyRotateXUp2 = KeyCode.R;
         KeyRotateXDown1 = KeyCode.F;
         KeyRotateXDown2 = KeyCode.F;
-        MainCamera.transform.position = new Vector3(0.0f, 8.0f, -8.0f);
-        MainCamera.transform.rotation = Quaternion.Euler(50.0f, 0.0f, 0.0f);
+        MainCamera.transform.position = new Vector3(0.0f, 10.0f, -4.0f);
+        MainCamera.transform.rotation = Quaternion.Euler(75.0f, 0.0f, 0.0f);
         cameraVelocity = 6.0f;
         cameraRotationVelocity = 15.0f;
         cameraYMin = 3.0f;

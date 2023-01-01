@@ -15,7 +15,7 @@ public class TileManager : MonoBehaviour
         const int field = 2;
         tileSides = new Dictionary<string, int[]>()
         {
-            ["A"] = new int[] { field, field, field, road }, // up, left, down, right; up - z axis, left - x axis
+            ["A"] = new int[] { field, field, field, road }, // up, right, down, left; up - z axis, left - x axis
             ["B"] = new int[] { field, field, field, field },
             ["C"] = new int[] { city, city, city, city },
             ["D"] = new int[] { road, field, road, city },
@@ -56,33 +56,32 @@ public class TileManager : MonoBehaviour
         int[] oldTileSides = tileSides[oldTileName];
         if (rotationType == 1 || rotationType == -3)
         {
-            int tmp = oldTileSides[3];
-            oldTileSides[3] = oldTileSides[2];
-            oldTileSides[2] = oldTileSides[1];
-            oldTileSides[1] = oldTileSides[0];
-            oldTileSides[0] = tmp;
+            res[0] = tileSides[newTileName].Contains(oldTileSides[3]);
+            res[1] = tileSides[newTileName].Contains(oldTileSides[0]);
+            res[2] = tileSides[newTileName].Contains(oldTileSides[1]);
+            res[3] = tileSides[newTileName].Contains(oldTileSides[2]);
         }
-        if (rotationType == 2 || rotationType == -2)
+        else if (rotationType == 2 || rotationType == -2)
         {
-            int tmp = oldTileSides[2];
-            oldTileSides[2] = oldTileSides[0];
-            oldTileSides[0] = tmp;
-            tmp = oldTileSides[3];
-            oldTileSides[3] = oldTileSides[1];
-            oldTileSides[1] = tmp;
+            res[0] = tileSides[newTileName].Contains(oldTileSides[2]);
+            res[1] = tileSides[newTileName].Contains(oldTileSides[3]);
+            res[2] = tileSides[newTileName].Contains(oldTileSides[0]);
+            res[3] = tileSides[newTileName].Contains(oldTileSides[1]);
         }
-        if (rotationType == 3 || rotationType == -1)
+        else if (rotationType == 3 || rotationType == -1)
         {
-            int tmp = oldTileSides[0];
-            oldTileSides[0] = oldTileSides[1];
-            oldTileSides[1] = oldTileSides[2];
-            oldTileSides[2] = oldTileSides[3];
-            oldTileSides[3] = tmp;
+            res[0] = tileSides[newTileName].Contains(oldTileSides[1]);
+            res[1] = tileSides[newTileName].Contains(oldTileSides[2]);
+            res[2] = tileSides[newTileName].Contains(oldTileSides[3]);
+            res[3] = tileSides[newTileName].Contains(oldTileSides[0]);
         }
-        res[0] = tileSides[newTileName].Contains(oldTileSides[0]);
-        res[1] = tileSides[newTileName].Contains(oldTileSides[1]);
-        res[2] = tileSides[newTileName].Contains(oldTileSides[2]);
-        res[3] = tileSides[newTileName].Contains(oldTileSides[3]);
+        else
+        {
+            res[0] = tileSides[newTileName].Contains(oldTileSides[0]);
+            res[1] = tileSides[newTileName].Contains(oldTileSides[1]);
+            res[2] = tileSides[newTileName].Contains(oldTileSides[2]);
+            res[3] = tileSides[newTileName].Contains(oldTileSides[3]);
+        }
         return res;
     }
 }

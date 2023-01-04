@@ -19,7 +19,7 @@ public class GameManager : MonoBehaviour
     private int counterTiles;
     private bool isChoosing;
     private float heightChoice;
-    private float edge;
+    private int edge;
     private int maxTiles;
     private int maxTypesOfTiles;
 
@@ -29,7 +29,7 @@ public class GameManager : MonoBehaviour
         counterTiles = 0;
         heightChoice = 0.2f;
         isChoosing = false;
-        edge = 2.0f;
+        edge = 2;
         maxTiles = 72;
         maxTypesOfTiles = 24;
         MotionManager = GameObject.Find("MotionManager");
@@ -83,7 +83,7 @@ public class GameManager : MonoBehaviour
                         ChoosingSquares = new List<GameObject>();
                         if (counterTiles < maxTiles)
                         {
-                            int fieldSide = (maxTiles + 1) * 4;
+                            int fieldSide = (maxTiles + 1) * edge * 2;
                             int[,] putAllSquares = new int[fieldSide, fieldSide];
 
                             for (int i = 0; i < fieldSide; i++)
@@ -100,34 +100,14 @@ public class GameManager : MonoBehaviour
                                 int zOfTheTile = (int)Tiles[i].transform.position.z + fieldSide / 2;
                                 bool[] putSquares = _tileManager.areCompatible(tiles[counterTiles], tiles[i], (int)(Tiles[i].transform.rotation.eulerAngles.y / 90));
                                 putAllSquares[xOfTheTile, zOfTheTile] = 0;
-                                if (putAllSquares[xOfTheTile, zOfTheTile + 2] == 2 || putAllSquares[xOfTheTile, zOfTheTile + 2] == 1)
-                                {
-                                    if (putSquares[0])
-                                        putAllSquares[xOfTheTile, zOfTheTile + 2] = 1;
-                                    else
-                                        putAllSquares[xOfTheTile, zOfTheTile + 2] = 0;
-                                }
-                                if (putAllSquares[xOfTheTile + 2, zOfTheTile] == 2 || putAllSquares[xOfTheTile + 2, zOfTheTile] == 1)
-                                {
-                                    if (putSquares[1])
-                                        putAllSquares[xOfTheTile + 2, zOfTheTile] = 1;
-                                    else
-                                        putAllSquares[xOfTheTile + 2, zOfTheTile] = 0;
-                                }
-                                if (putAllSquares[xOfTheTile, zOfTheTile - 2] == 2 || putAllSquares[xOfTheTile, zOfTheTile - 2] == 1)
-                                {
-                                    if (putSquares[2])
-                                        putAllSquares[xOfTheTile, zOfTheTile - 2] = 1;
-                                    else
-                                        putAllSquares[xOfTheTile, zOfTheTile - 2] = 0;
-                                }
-                                if (putAllSquares[xOfTheTile - 2, zOfTheTile] == 2 || putAllSquares[xOfTheTile - 2, zOfTheTile] == 1)
-                                {
-                                    if (putSquares[3])
-                                        putAllSquares[xOfTheTile - 2, zOfTheTile] = 1;
-                                    else
-                                        putAllSquares[xOfTheTile - 2, zOfTheTile] = 0;
-                                }
+                                if (putAllSquares[xOfTheTile, zOfTheTile + edge] == 2 || putAllSquares[xOfTheTile, zOfTheTile + edge] == 1)
+                                    putAllSquares[xOfTheTile, zOfTheTile + edge] = Convert.ToInt32(putSquares[0]);
+                                if (putAllSquares[xOfTheTile + edge, zOfTheTile] == 2 || putAllSquares[xOfTheTile + edge, zOfTheTile] == 1)
+                                    putAllSquares[xOfTheTile + edge, zOfTheTile] = Convert.ToInt32(putSquares[1]);
+                                if (putAllSquares[xOfTheTile, zOfTheTile - edge] == 2 || putAllSquares[xOfTheTile, zOfTheTile - edge] == 1)
+                                    putAllSquares[xOfTheTile, zOfTheTile - edge] = Convert.ToInt32(putSquares[2]);
+                                if (putAllSquares[xOfTheTile - edge, zOfTheTile] == 2 || putAllSquares[xOfTheTile - edge, zOfTheTile] == 1)
+                                    putAllSquares[xOfTheTile - edge, zOfTheTile] = Convert.ToInt32(putSquares[3]);
                             }
 
                             for (int i = 0; i < fieldSide; i++)
@@ -162,7 +142,7 @@ public class GameManager : MonoBehaviour
         RaycastHit Hit = CameraHit();
         if (Hit.transform != null)
         {
-            if (ChoosingSquares[0].transform.CompareTag(Hit.transform.tag) && counterTiles <= maxTiles)
+            if (_prefabManager.GetPrefabByName("ChoosingSquare").transform.CompareTag(Hit.transform.tag) && counterTiles <= maxTiles)
             {
                 isChoosing = true;
                 if (isNew)

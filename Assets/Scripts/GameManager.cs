@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -22,6 +23,8 @@ public class GameManager : MonoBehaviour
     private int edge;
     private int maxTiles;
     private int maxTypesOfTiles;
+    private int fieldSide;
+    string[,,] neighboringTiles;
 
     // Start is called before the first frame update
     void Start()
@@ -43,6 +46,8 @@ public class GameManager : MonoBehaviour
         ChoosingSquares = new List<GameObject>();
         tileNames = new string[] { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X" };
         tiles = new string[maxTiles];
+        fieldSide = (maxTiles + 1) * edge * 2;
+        neighboringTiles = new string[fieldSide, fieldSide, 4];
 
         for (int i = 0; i < maxTiles; i++)
         {
@@ -83,14 +88,18 @@ public class GameManager : MonoBehaviour
                         ChoosingSquares = new List<GameObject>();
                         if (counterTiles < maxTiles)
                         {
-                            int fieldSide = (maxTiles + 1) * edge * 2;
                             int[,] putAllSquares = new int[fieldSide, fieldSide];
+                            neighboringTiles = new string[fieldSide, fieldSide, 4];
 
                             for (int i = 0; i < fieldSide; i++)
                             {
                                 for (int j = 0; j < fieldSide; j++)
                                 {
                                     putAllSquares[i, j] = 2;
+                                    neighboringTiles[i, j, 0] = "None";
+                                    neighboringTiles[i, j, 1] = "None";
+                                    neighboringTiles[i, j, 2] = "None";
+                                    neighboringTiles[i, j, 3] = "None";
                                 }
                             }
 
@@ -98,8 +107,12 @@ public class GameManager : MonoBehaviour
                             {
                                 int xOfTheTile = (int)Tiles[i].transform.position.x + fieldSide / 2;
                                 int zOfTheTile = (int)Tiles[i].transform.position.z + fieldSide / 2;
-                                bool[] putSquares = _tileManager.areCompatible(tiles[counterTiles], tiles[i], (int)(Tiles[i].transform.rotation.eulerAngles.y / 90));
+                                bool[] putSquares = _tileManager.AreCompatible(tiles[counterTiles], tiles[i], (int)(Tiles[i].transform.rotation.eulerAngles.y / 90));
                                 putAllSquares[xOfTheTile, zOfTheTile] = 0;
+                                neighboringTiles[xOfTheTile, zOfTheTile + edge, 2] = tiles[i];
+                                neighboringTiles[xOfTheTile + edge, zOfTheTile, 3] = tiles[i];
+                                neighboringTiles[xOfTheTile, zOfTheTile - edge, 0] = tiles[i];
+                                neighboringTiles[xOfTheTile - edge, zOfTheTile, 1] = tiles[i];
                                 if (putAllSquares[xOfTheTile, zOfTheTile + edge] == 2 || putAllSquares[xOfTheTile, zOfTheTile + edge] == 1)
                                     putAllSquares[xOfTheTile, zOfTheTile + edge] = Convert.ToInt32(putSquares[0]);
                                 if (putAllSquares[xOfTheTile + edge, zOfTheTile] == 2 || putAllSquares[xOfTheTile + edge, zOfTheTile] == 1)
@@ -114,7 +127,8 @@ public class GameManager : MonoBehaviour
                             {
                                 for (int j = 0; j < fieldSide; j++)
                                 {
-                                    if (putAllSquares[i, j] == 1)
+                                    bool[] avalibleRotations = _tileManager.AvalibleRotations(tiles[counterTiles], neighboringTiles[i, j, 0], neighboringTiles[i, j, 1], neighboringTiles[i, j, 2], neighboringTiles[i, j, 3]);
+                                    if (putAllSquares[i, j] == 1 && avalibleRotations.Contains(true))
                                         ChoosingSquares.Add(AddPrefabByName("ChoosingSquare", i - fieldSide / 2, 0, j - fieldSide / 2));
                                 }
                             }

@@ -10,6 +10,7 @@ public class TileManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        const int none = -1;
         const int road = 0;
         const int city = 1;
         const int field = 2;
@@ -39,7 +40,7 @@ public class TileManager : MonoBehaviour
             ["V"] = new int[] { road, road, field, field },
             ["W"] = new int[] { road, road, road, field },
             ["X"] = new int[] { road, road, road, road },
-
+            ["None"] = new int[] { none, none, none, none }
         };
     }
 
@@ -50,7 +51,7 @@ public class TileManager : MonoBehaviour
     }
 
     // This method returns an array of compatibility of two tiles (up, right, down, left)
-    public bool[] areCompatible(string newTileName, string oldTileName, int rotationType)
+    public bool[] AreCompatible(string newTileName, string oldTileName, int rotationType)
     {
         bool[] res = new bool[4];
         int[] oldTileSides = tileSides[oldTileName];
@@ -82,6 +83,22 @@ public class TileManager : MonoBehaviour
             res[2] = tileSides[newTileName].Contains(oldTileSides[2]);
             res[3] = tileSides[newTileName].Contains(oldTileSides[3]);
         }
+        return res;
+    }
+
+    // This method returns avalible tile rotation options
+    public bool[] AvalibleRotations(string newTileName, string upperTileName, string rightTileName, string bottomTileName, string leftTileName)
+    {
+        bool[] res = new bool[4];
+        int[] newTileSides = tileSides[newTileName];
+        int upperTileSide = tileSides[upperTileName][2];
+        int rightTileSide = tileSides[rightTileName][3];
+        int bottomTileSide = tileSides[bottomTileName][0];
+        int leftTileSide = tileSides[leftTileName][1];
+        res[0] = (upperTileSide == newTileSides[0] || upperTileSide == -1) && (rightTileSide == newTileSides[1] || rightTileSide == -1) && (bottomTileSide == newTileSides[2] || bottomTileSide == -1) && (leftTileSide == newTileSides[3] || leftTileSide == -1);
+        res[1] = (upperTileSide == newTileSides[3] || upperTileSide == -1) && (rightTileSide == newTileSides[0] || rightTileSide == -1) && (bottomTileSide == newTileSides[1] || bottomTileSide == -1) && (leftTileSide == newTileSides[2] || leftTileSide == -1);
+        res[2] = (upperTileSide == newTileSides[2] || upperTileSide == -1) && (rightTileSide == newTileSides[3] || rightTileSide == -1) && (bottomTileSide == newTileSides[0] || bottomTileSide == -1) && (leftTileSide == newTileSides[1] || leftTileSide == -1);
+        res[3] = (upperTileSide == newTileSides[1] || upperTileSide == -1) && (rightTileSide == newTileSides[2] || rightTileSide == -1) && (bottomTileSide == newTileSides[3] || bottomTileSide == -1) && (leftTileSide == newTileSides[0] || leftTileSide == -1);
         return res;
     }
 }
